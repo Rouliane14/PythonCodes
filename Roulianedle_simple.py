@@ -107,9 +107,15 @@ while try_number<8:
             guess = input("Sorry, that word isn't in the word list. Please try another one (tip: the list does not include any standard plural): ")
             guess = str.lower(guess)
     else:
-        while not hard_mode_yellow_check(guess, previous_dict):
-            while not hard_mode_green_check(guess, previous_dict):
-                while not isinwordlist(guess):
+        y_check = hard_mode_yellow_check(guess, previous_dict)
+        g_check = hard_mode_green_check(guess, previous_dict)
+        print("Right before the loop starts, green check is",g_check)
+        print("And yellow check is", y_check)
+        print("Guess is", guess)
+        print("Previous dict is", previous_dict)
+        while y_check == False:
+            while g_check == False:
+                while isinwordlist(guess) == False:
                     guess = input("Sorry, that word isn't in the word list. Please try another one (tip: the list does not include any standard plural): ")
                     guess = str.lower(guess)
                 guess = input("Sorry, this is hard mode! Please keep the greens where you've found them! Consider this, and guess again: ")
