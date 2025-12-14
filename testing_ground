@@ -1,61 +1,6 @@
-previous_guessed_letters = {"pos1": {"position": 1, "letter": "-",  "colour": "⬜️"},
-                "pos2": {"position": 2, "letter": "-", "colour": "⬜️"},
-                "pos3": {"position": 3, "letter": "-", "colour": "⬜️"},
-                "pos4": {"position": 4, "letter": "-", "colour": "⬜️"},
-                "pos5": {"position": 5, "letter": "-", "colour": "⬜️"}}
+hint = ["🟨", "🟩", "⬜️", "🟨", "⬜️"]
 
-
-# guessed_letters["pos2"]["letter"] = "A"
-# guessed_letters["pos2"]["colour"] = "green"
-
-solution = list("steal")
-guess_1 = list("meaty")
-hint = ["⬜️", "🟨", "🟨", "🟨", "⬜️"]
-guess_2a = list("spend")
-guess_2b = list("mouse")
-guess_2c = list("spout")
-
-# print(list(enumerate(guessed_letters)))
-
-for i, pos in enumerate(previous_guessed_letters):
-    previous_guessed_letters[pos]["letter"] = guess_1[i]
-    previous_guessed_letters[pos]["colour"] = hint[i]
-
-# first, check if the found greens have been kept
-
-respect_green = True
-yellow_list = []
-respect_yellow = True
-guess_valid = respect_green and respect_yellow
-
-for i, pos in enumerate(previous_guessed_letters):
-    if guess_2c[i] != previous_guessed_letters[pos]["letter"] and previous_guessed_letters[pos]["colour"] == "🟩":
-        respect_green = False
-        break
-    else:
-        respect_green = True
-if respect_green == False:
-    guess = input("This is hard mode! Keep the green letters where you've found them! Enter a new guess:")
-
-# second, check if yellow letters are somewhere in the word
-
-for item in previous_guessed_letters:
-    if previous_guessed_letters[item]["colour"] == "🟨":
-        yellow_list.append(previous_guessed_letters[item]["letter"]) # isolate the yellow letters in a separate list, since order doesn't matter like for green
-
-
-for i, pos in enumerate(previous_guessed_letters):
-    if guess_2c[i] not in yellow_list:
-        respect_yellow = False
-        break
-    else:
-        yellow_list.pop[yellow_list.index(guess_2c[i])]
-        respect_yellow = True
-
-
-
-print("Green:", respect_green)
-print("Yellow:",respect_yellow)
+print("".join(hint))
 
 
 

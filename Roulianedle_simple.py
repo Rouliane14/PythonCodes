@@ -7,49 +7,92 @@ def randomliane(max):  # will return a random integer between 0 and max
     rand = math.fmod(math.floor(time.time() * 1000), max+1)
     return(int(rand))
 
-def isinwordlist(word): # check if a word is in the word list
+def isinwordlist(word): # check if a word is in the word list, returns boolean
+    word = str.lower(word)
     if word in five_letter_word_list:
         return True
     else:
         return False
 
-def hint(guess, sol): # produces the hint list for given guess and solution
-    temp_solution_letters = solution_letters[:]
+def create_hint(guess, sol): # produces the hint list for given guess and solution, inputs both as strings
+    sol = list(sol)
+    guess = list(guess)
+    temp_sol_letters = sol[:]
     hint = []
     for i in range(5):
-        if guess_letters[i] == solution_letters[i]:
+        if guess[i] == sol[i]:
             hint.append("🟩")
-            temp_solution_letters[i]="-"
+            temp_sol_letters[i]="-"
         else:
-                hint.append("⬜️")
-    print(temp_solution_letters)
+            hint.append("⬜️")
     for i in range(5):
-        if guess_letters[i] in temp_solution_letters and temp_solution_letters[i]!="-":
+        if guess[i] in temp_sol_letters and temp_sol_letters[i]!="-":
             hint[i]="🟨"
-            temp_solution_letters[temp_solution_letters.index(guess_letters[i])]="^"
-        
-    previous_guess = guess
-    print(hint[0]+hint[1]+hint[2]+hint[3]+hint[4])
+            temp_sol_letters[temp_sol_letters.index(guess[i])]="^"
+    return(hint)
 
+def build_hint_and_guess_dict(guess, hint): # build the nested dictionary to compare against
+    guess = list(guess)
+    dict = {"pos1": {"position": 1, "letter": "-", "colour": "⬜️"},
+            "pos2": {"position": 2, "letter": "-", "colour": "⬜️"},
+            "pos3": {"position": 3, "letter": "-", "colour": "⬜️"},
+            "pos4": {"position": 4, "letter": "-", "colour": "⬜️"},
+            "pos5": {"position": 5, "letter": "-", "colour": "⬜️"}
+            }
+    for i, pos in enumerate(dict):
+        dict[pos]["letter"] = guess[i]
+        dict[pos]["colour"] = hint[i]
+    return(dict)
+
+def hard_mode_green_check(guess, dict): # check if a newly given word keeps the previously found green letters in place
+    flag = True
+    guess = list(guess)
+    for i, pos in enumerate(dict):
+        if dict[pos]["colour"] == "🟩" and guess[i] != dict[pos]["letter"]:
+            flag = False
+            break
+        else:
+            pass
+    return flag
+    
+def hard_mode_yellow_check(guess, dict): # to run after green check (important). Now checking for if found yellows are present in guess
+    flag = True
+    guess = list(guess)
+    yellow_list = []
+    guess_without_greens = ["*", "*", "*", "*", "*"]
+    for i, pos in enumerate(dict): # make a temp copy of the current guess, removing spots where it was green before
+        if dict[pos]["colour"] == "🟨":
+            guess_without_greens[i] = guess[i]
+            yellow_list.append(guess[i])
+        elif dict[pos]["colour"] == "⬜️":
+            guess_without_greens[i] = guess[i]
+        else:
+            pass
+    for i in range(len(yellow_list)):
+        if yellow_list[i] not in guess:
+            flag = False
+            break
+        else:
+            pass
+    return flag
+    
 
 solution = five_letter_word_list[randomliane(len(five_letter_word_list)-1)]
+print("This is for testing, the solution is:", solution)
 solution_letters = list(solution)
 try_number = 1
-previous_guess = ""
-previous_guessed_letters = {"pos1": {"position": 1, "letter": "-", "colour": "⬜️"},
-                            "pos2": {"position": 2, "letter": "-", "colour": "⬜️"},
-                            "pos3": {"position": 3, "letter": "-", "colour": "⬜️"},
-                            "pos4": {"position": 4, "letter": "-", "colour": "⬜️"},
-                            "pos5": {"position": 5, "letter": "-", "colour": "⬜️"}
-                            }
 
-print("Welcome to Roulianedle, choose your difficulty.")
+
+print("Welcome to Roulianedle, choose your mode.")
 
 # hard mode selection
-hard_mode_choice = input("Type yes to play in hard mode")
+hard_mode_choice = input("Type yes to play in hard mode: ")
 if str.lower(hard_mode_choice) == "yes":
     hard_mode = True
     print("You'll be playing in hard mode")
+elif str.lower(hard_mode_choice) == "yes sir":
+    hard_mode = True
+    print("You have good manners, pleased to be playing in hard mode with you")
 else:
     hard_mode = False
     print("You'll be playing in noob mode like the noob you are")
@@ -57,50 +100,24 @@ else:
 # starting the guess
 while try_number<8:
     
-    guess = ""
-    respect_green = False
-    yellow_list = []
-    respect_yellow = False
-    guess_valid = respect_green and respect_yellow
-    
-    while guess not in five_letter_word_list and not guess_valid:
-        guess = input("Enter your guess:")
-        guess = str.lower(guess)
-        while guess not in five_letter_word_list:
-            print("WTF is that word yo, try a real one from the list please")
-            guess = input("Enter another word. Tip: there are no regular plurals in the list. New guess: ")
+    guess = input("Enter your guess: ")
+
+    if not hard_mode or try_number == 1:
+        while not isinwordlist(guess):
+            guess = input("Sorry, that word isn't in the word list. Please try another one (tip: the list does not include any standard plural): ")
+            guess = str.lower(guess)
+    else:
+        while not hard_mode_yellow_check(guess, previous_dict):
+            while not hard_mode_green_check(guess, previous_dict):
+                while not isinwordlist(guess):
+                    guess = input("Sorry, that word isn't in the word list. Please try another one (tip: the list does not include any standard plural): ")
+                    guess = str.lower(guess)
+                guess = input("Sorry, this is hard mode! Please keep the greens where you've found them! Consider this, and guess again: ")
+                guess = str.lower(guess)
+            guess = input("Sorry, this is hard mode! You need to use previously discovered yellow letters. Try again respecting this rule: ")
             guess = str.lower(guess)
 
-        # for the hard mode extra check, only from second try onward
-        if hard_mode and try_number >1:
-            for i, pos in enumerate(previous_guessed_letters):
-                previous_guessed_letters[pos]["letter"] = previous_guess[i]
-                previous_guessed_letters[pos]["colour"] = hint[i]
-            for i, pos in enumerate(previous_guessed_letters): # checking if the previous greens are still in place
-                if guess[i] != previous_guessed_letters[pos]["letter"] and previous_guessed_letters[pos]["colour"] == "🟩":
-                    respect_green = False
-                    break
-                else:
-                    respect_green = True
-            if respect_green == False:
-                guess = input("This is hard mode! Keep the green letters where you've found them! Enter a new guess: ")
-            for item in previous_guessed_letters: # now checking the yellow letters
-                if previous_guessed_letters[item]["colour"] == "🟨":
-                    yellow_list.append(previous_guessed_letters[item]["letter"]) 
-            for i, pos in enumerate(previous_guessed_letters):
-                if guess[i] not in yellow_list:
-                    respect_yellow = False
-                    break
-                else:
-                    yellow_list.pop[yellow_list.index(guess[i])]
-                    respect_yellow = True
-            if respect_yellow == False:
-                guess = input("This is hard mode! Keep the yellow letters in your next guesses! Enter a new guess: ")
-            guess_valid = respect_green and respect_yellow
-        
-    guess_letters = list(guess)
-
-    # first, check for blind luck
+    # to get here, guess has been validated. Now onto checking it for victory first.
     if(guess==solution):
         print("🟩🟩🟩🟩🟩")
         if try_number == 1:
@@ -110,36 +127,20 @@ while try_number<8:
         else:
             print("You have defeated Roulianedle in", try_number, "moves, good job to you!")
         try_number=8
-
     else:
-        # this should be the logic to check each letter of the guess word against the solution
-        temp_solution_letters = solution_letters[:]
-        hint = []
-        for i in range(5):
-            if guess_letters[i] == solution_letters[i]:
-                hint.append("🟩")
-                temp_solution_letters[i]="-"
-            else:
-                hint.append("⬜️")
-        print(temp_solution_letters)
-        for i in range(5):
-            if guess_letters[i] in temp_solution_letters and temp_solution_letters[i]!="-":
-                hint[i]="🟨"
-                temp_solution_letters[temp_solution_letters.index(guess_letters[i])]="^"
-        
-        previous_guess = guess
-        print(hint[0]+hint[1]+hint[2]+hint[3]+hint[4])
-        try_number +=1
-        if try_number<7:
-            print("Starting Attempt number", try_number, "out of 7")
-        else:
-            print("Roulianedle has defeated you, bow before your new daddy mwahaha")
+        # to get here, guess was not solution. So prepare all info to display and for next loop
+        hint = create_hint(guess, solution)
+
+        previous_dict = build_hint_and_guess_dict(guess, hint)
+
+        print("This is the result:", "".join(hint))
+    
+        if try_number < 7:
+            print("Starting attempt number", try_number+1, "out of 7.")
             try_number += 1
-        
-
-
+        else:
+            print("Roulianedle has defeated you. Get icced buddy. Welcome to the dodecahedron.")
+            try_number += 1
     
-
     
-
 
