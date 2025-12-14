@@ -7,6 +7,31 @@ def randomliane(max):  # will return a random integer between 0 and max
     rand = math.fmod(math.floor(time.time() * 1000), max+1)
     return(int(rand))
 
+def isinwordlist(word): # check if a word is in the word list
+    if word in five_letter_word_list:
+        return True
+    else:
+        return False
+
+def hint(guess, sol): # produces the hint list for given guess and solution
+    temp_solution_letters = solution_letters[:]
+    hint = []
+    for i in range(5):
+        if guess_letters[i] == solution_letters[i]:
+            hint.append("🟩")
+            temp_solution_letters[i]="-"
+        else:
+                hint.append("⬜️")
+    print(temp_solution_letters)
+    for i in range(5):
+        if guess_letters[i] in temp_solution_letters and temp_solution_letters[i]!="-":
+            hint[i]="🟨"
+            temp_solution_letters[temp_solution_letters.index(guess_letters[i])]="^"
+        
+    previous_guess = guess
+    print(hint[0]+hint[1]+hint[2]+hint[3]+hint[4])
+
+
 solution = five_letter_word_list[randomliane(len(five_letter_word_list)-1)]
 solution_letters = list(solution)
 try_number = 1
